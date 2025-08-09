@@ -236,8 +236,10 @@ function createOpportunity(
   if (priceDiff <= 0) return null
   
   // Calculate trade size based on available liquidity
+  // Use only 10-20% of available liquidity to minimize slippage
   const maxTradeSize = Math.min(buyQuote.liquidity, sellQuote.liquidity)
-  const tradeSize = Math.min(maxTradeSize, 10000) // Max $10K per trade
+  const liquidityBasedSize = maxTradeSize * 0.15 // Use 15% of available liquidity
+  const tradeSize = Math.min(liquidityBasedSize, 10000) // Max $10K per trade
   
   const grossPnlUsd = (priceDiff / buyQuote.price) * tradeSize
   

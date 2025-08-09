@@ -7,9 +7,12 @@ export async function POST(request: NextRequest) {
   try {
     // Parse and validate request body
     const body = await request.json()
+    console.log('Simulation request body:', JSON.stringify(body, null, 2))
+    
     const parseResult = SimulateRequestSchema.safeParse(body)
     
     if (!parseResult.success) {
+      console.log('Validation errors:', parseResult.error.errors)
       return NextResponse.json(
         { 
           error: 'Invalid request format',
@@ -20,6 +23,8 @@ export async function POST(request: NextRequest) {
     }
 
     const simulateRequest = parseResult.data
+    console.log('Parsed simulation request:', JSON.stringify(simulateRequest, null, 2))
+    console.log('Max slippage BPS from request:', simulateRequest.maxSlippageBps)
 
     // Validate opportunity data
     const validation = validateOpportunity(simulateRequest)

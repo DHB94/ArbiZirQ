@@ -77,18 +77,18 @@ export const ScanRequestSchema = z.object({
   pairs: z.array(TokenPairSchema),
   chains: z.array(ChainSchema),
   minProfitUsd: z.number().default(10),
-  maxSlippageBps: z.number().default(100),
+  maxSlippageBps: z.number().default(500), // Updated to 5%
 })
 export type ScanRequest = z.infer<typeof ScanRequestSchema>
 
 export const SimulateRequestSchema = OpportunitySchema.extend({
-  maxSlippageBps: z.number().default(100),
+  maxSlippageBps: z.number().default(500), // Updated to 5%
 })
 export type SimulateRequest = z.infer<typeof SimulateRequestSchema>
 
 export const ExecuteRequestSchema = OpportunitySchema.extend({
   dryRun: z.boolean().default(false),
-  maxSlippageBps: z.number().default(100),
+  maxSlippageBps: z.number().default(500), // Updated to 5%
   userAddress: z.string().optional(),
 })
 export type ExecuteRequest = z.infer<typeof ExecuteRequestSchema>

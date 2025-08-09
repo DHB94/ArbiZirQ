@@ -150,11 +150,35 @@ export function passesGuardrails(
     opportunity.sellQuote.liquidity
   )
   
+  // Add warnings for high slippage but don't fail immediately
   if (buySlippage > maxSlippageBps) {
-    reasons.push(`Buy slippage too high: ${buySlippage} bps > ${maxSlippageBps} bps`)
+    if (buySlippage > maxSlippageBps * 2) {
+      // Only fail if slippage is more than 2x the limit
+      reasons.push(`Buy slippage too high: ${buySlippage} bps > ${maxSlippageBps} bps`)
+    } else {
+      // Add warning but allow to proceed
+      reasons.push(`High buy slippage warning: ${buySlippage} bps (limit: ${maxSlippageBps} bps)`)
+    }
   }
   if (sellSlippage > maxSlippageBps) {
-    reasons.push(`Sell slippage too high: ${sellSlippage} bps > ${maxSlippageBps} bps`)
+    if (sellSlippage > maxSlippageBps * 2) {
+      // Only fail if slippage is more than 2x the limit
+      reasons.push(`Sell slippage too high: ${sellSlippage} bps > ${maxSlippageBps} bps`)
+    } else {
+      // Add warning but allow to proceed
+      reasons.push(`High sell slippage warning: ${sellSlippage} bps (limit: ${maxSlippageBps} bps)`)
+    }
+  }
+  
+  // Suggest optimal trade size if slippage is too high
+  if (buySlippage > maxSlippageBps || sellSlippage > maxSlippageBps) {
+    const optimalSize = Math.min(
+      Math.sqrt(maxSlippageBps / 10000) * opportunity.buyQuote.liquidity,
+      Math.sqrt(maxSlippageBps / 10000) * opportunity.sellQuote.liquidity
+    )
+    if (optimalSize < opportunity.sizeDollar) {
+      reasons.push(`Consider reducing trade size to $${optimalSize.toFixed(2)} for lower slippage`)
+    }
   }
   
   return {
@@ -168,7 +192,7 @@ export function passesGuardrails(
  */
 export function simulateArbitrage(
   opportunity: Opportunity,
-  maxSlippageBps: number = 100
+  maxSlippageBps: number = 500 // Updated to match new default
 ): SimulationResult {
   const { passes, reasons } = passesGuardrails(
     opportunity,

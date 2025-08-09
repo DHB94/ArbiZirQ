@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Opportunity, SimulationResult } from '@/lib/types'
 import { formatUSD, formatBasisPoints } from '@/lib/format'
 import { apiClient } from '@/lib/api'
+import { DEFAULT_SETTINGS } from '@/lib/constants'
 import { Loader2, TrendingUp, AlertTriangle } from 'lucide-react'
 
 interface SimulateDrawerProps {
@@ -23,13 +25,14 @@ export function SimulateDrawer({
 }: SimulateDrawerProps) {
   const [isSimulating, setIsSimulating] = useState(false)
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null)
+  const [maxSlippage, setMaxSlippage] = useState<number>(DEFAULT_SETTINGS.maxSlippageBps)
 
   const handleSimulate = async () => {
     setIsSimulating(true)
     try {
       const result = await apiClient.simulate({
         ...opportunity,
-        maxSlippageBps: 100, // Default 1% max slippage
+        maxSlippageBps: maxSlippage, // Use configurable slippage
       })
       
       setSimulationResult(result)
@@ -200,6 +203,36 @@ export function SimulateDrawer({
                 <div className="flex justify-between text-sm">
                   <span>Slippage Impact:</span>
                   <span>{formatBasisPoints(simulationResult.slippageImpact)}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Slippage Settings */}
+          {!simulationResult && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Max Slippage Tolerance
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={maxSlippage}
+                      onChange={(e) => setMaxSlippage(Number(e.target.value))}
+                      min="1"
+                      max="2000"
+                      step="10"
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      bps ({(maxSlippage / 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Higher values allow more slippage but increase execution success rate
+                  </p>
                 </div>
               </CardContent>
             </Card>

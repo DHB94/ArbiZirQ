@@ -4,16 +4,21 @@ import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OpportunityTable } from '@/components/OpportunityTable'
 import { SimulateDrawer } from '@/components/SimulateDrawer'
 import { ExecuteDialog } from '@/components/ExecuteDialog'
 import { SettingsSheet } from '@/components/SettingsSheet'
 import { GuardrailsBanner } from '@/components/GuardrailsBanner'
+import { PortfolioTracker } from '@/components/PortfolioTracker'
+import { TradingInterface } from '@/components/TradingInterface'
+import { NotificationCenter } from '@/components/NotificationCenter'
 import { Toast } from '@/components/Toast'
 import { apiClient, swrKeys } from '@/lib/api'
 import type { Opportunity, ScanRequest } from '@/lib/types'
 import { DEFAULT_TOKEN_PAIRS, SUPPORTED_CHAINS, DEFAULT_SETTINGS } from '@/lib/constants'
-import { Settings, RefreshCw, Activity } from 'lucide-react'
+import { Settings, RefreshCw, Activity, BarChart3, Bot, Home } from 'lucide-react'
+import Link from 'next/link'
 
 export default function Dashboard() {
   const [scanRequest, setScanRequest] = useState<ScanRequest>({
@@ -96,8 +101,25 @@ export default function Dashboard() {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link href="/analytics" className="text-muted-foreground hover:text-foreground">
+              Analytics
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link href="/api" className="text-muted-foreground hover:text-foreground">
+              API Docs
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">ArbiZirQ</h1>
+            <h1 className="text-3xl font-bold tracking-tight">ArbiZirQ Dashboard</h1>
             <p className="text-muted-foreground">
               Flash Arbitrage Executor - Zircuit × Bitte
             </p>
@@ -112,6 +134,8 @@ export default function Dashboard() {
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
+            
+            <NotificationCenter />
             
             <Button
               variant="outline"
@@ -137,98 +161,145 @@ export default function Dashboard() {
         {/* Guardrails Banner */}
         <GuardrailsBanner health={health} />
 
-        {/* Main Content */}
-        <div className="grid gap-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="opportunities" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="opportunities" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Opportunities
+            </TabsTrigger>
+            <TabsTrigger value="trading" className="flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Auto Trading
+            </TabsTrigger>
+            <TabsTrigger value="portfolio" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Portfolio
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="opportunities" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Opportunities Found
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {opportunities?.length ?? 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Active opportunities
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Best Opportunity
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ${opportunities?.[0]?.grossPnlUsd.toFixed(2) ?? '0.00'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Gross PnL (USD)
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Polling Status
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {pollingEnabled ? 'ON' : 'OFF'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {pollingInterval / 1000}s interval
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    System Status
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isHealthy ? '✅' : '⚠️'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    All systems
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Opportunities Table */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Opportunities Found
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Arbitrage Opportunities</CardTitle>
+                <CardDescription>
+                  Real-time cross-chain arbitrage opportunities sorted by profitability
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {opportunities?.length ?? 0}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Active opportunities
-                </p>
+                <OpportunityTable
+                  opportunities={opportunities ?? []}
+                  isLoading={isLoading}
+                  error={error}
+                  onSimulate={handleSimulate}
+                  onExecute={handleExecute}
+                />
               </CardContent>
             </Card>
+          </TabsContent>
 
+          <TabsContent value="trading" className="space-y-6">
+            <TradingInterface />
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="space-y-6">
+            <PortfolioTracker />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Best Opportunity
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle>Advanced Analytics</CardTitle>
+                <CardDescription>
+                  Comprehensive trading analytics and performance insights
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  ${opportunities?.[0]?.grossPnlUsd.toFixed(2) ?? '0.00'}
+                <div className="text-center py-12 text-muted-foreground">
+                  <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+                  <p>Advanced analytics dashboard with charts, trends, and insights</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Gross PnL (USD)
-                </p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Polling Status
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {pollingEnabled ? 'ON' : 'OFF'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {pollingInterval / 1000}s interval
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  System Status
-                </CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {isHealthy ? '✅' : '⚠️'}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  All systems
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Opportunities Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Arbitrage Opportunities</CardTitle>
-              <CardDescription>
-                Real-time cross-chain arbitrage opportunities sorted by profitability
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <OpportunityTable
-                opportunities={opportunities ?? []}
-                isLoading={isLoading}
-                error={error}
-                onSimulate={handleSimulate}
-                onExecute={handleExecute}
-              />
-            </CardContent>
-          </Card>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Modals and Drawers */}
         {selectedOpportunity && (

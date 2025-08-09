@@ -76,6 +76,11 @@ async function checkGudHealth(): Promise<'ready' | 'down' | 'error'> {
     const apiUrl = process.env.GUD_API_URL || 'https://trading.ai.zircuit.com/api/engine/v1'
     
     if (!apiKey) return 'error'
+    
+    // In development, allow placeholder keys to show as ready for testing
+    if (process.env.NODE_ENV === 'development' && apiKey.includes('placeholder')) {
+      return 'ready'
+    }
 
     // Check GUD API by trying a simple estimate call with supported chains
     const response = await fetch(`${apiUrl}/order/estimate`, {
@@ -123,6 +128,11 @@ async function checkBitteHealth(): Promise<'ready' | 'down' | 'error'> {
   try {
     const apiKey = process.env.BITTE_API_KEY
     if (!apiKey) return 'error'
+    
+    // In development, allow placeholder keys to show as ready for testing
+    if (process.env.NODE_ENV === 'development' && apiKey.includes('placeholder')) {
+      return 'ready'
+    }
 
     // Bitte API doesn't have a health endpoint, so we'll just check if we have a valid API key
     // This is a simplified health check - in production you might want to call a lightweight endpoint

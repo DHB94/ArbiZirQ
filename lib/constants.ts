@@ -55,7 +55,7 @@ export const DEX_FEE_BPS: Record<string, number> = {
 // Default application settings
 export const DEFAULT_SETTINGS = {
   minProfitUsd: 10,
-  maxSlippageBps: 100,
+  maxSlippageBps: 500, // 5% - More realistic for cross-chain arbitrage
   pollingIntervalMs: 5000,
   maxQuoteAgeSeconds: 30,
   dryRunMode: false,
