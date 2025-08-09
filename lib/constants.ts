@@ -126,7 +126,7 @@ export const BRIDGE_BASE_FEES: Record<Chain, number> = {
 // Token addresses for popular tokens (for contract calls)
 export const TOKEN_ADDRESSES: Record<Chain, Record<string, string>> = {
   ethereum: {
-    USDC: '0xA0b86a33E6441A, 8FadAA7F69C02E74ee82b',
+    USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Fixed address
     USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
@@ -138,13 +138,14 @@ export const TOKEN_ADDRESSES: Record<Chain, Record<string, string>> = {
     WMATIC: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
   },
   zircuit: {
-    // Placeholder addresses - replace with actual Zircuit token addresses
-    USDC: '0x0000000000000000000000000000000000000000',
-    USDT: '0x0000000000000000000000000000000000000000',
-    WETH: '0x0000000000000000000000000000000000000000',
+    // Placeholder addresses - using Ethereum addresses as placeholders for testing
+    USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
   },
   arbitrum: {
-    USDC: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+    USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // Updated to correct address
     USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
     WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
     WBTC: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',

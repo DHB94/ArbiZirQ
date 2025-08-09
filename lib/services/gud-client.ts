@@ -47,38 +47,44 @@ async function getGudQuote(request: ExecuteRequest): Promise<GudQuote> {
     throw new Error('GUD API key not configured')
   }
 
-  // Convert chain names to chain IDs
-  const srcChainId = getChainId(request.sourceChain)
-  const destChainId = getChainId(request.targetChain)
-  
-  // Convert USD amount to token wei amount (assuming USDC with 6 decimals for now)
-  const srcAmountWei = (request.sizeDollar * 1000000).toString() // 6 decimals for USDC
+  try {
+    // Convert chain names to chain IDs
+    const srcChainId = getChainId(request.sourceChain)
+    const destChainId = getChainId(request.targetChain)
+    
+    // Convert USD amount to token wei amount (assuming USDC with 6 decimals for now)
+    const srcAmountWei = (request.sizeDollar * 1000000).toString() // 6 decimals for USDC
 
-  const quoteRequest = {
-    srcChainId,
-    destChainId,
-    srcToken: getTokenAddress(request.pair.base, request.sourceChain),
-    destToken: getTokenAddress(request.pair.quote, request.targetChain),
-    srcAmountWei,
-    slippageBps: request.maxSlippageBps,
-    userAccount: request.userAddress || '0x0000000000000000000000000000000000000000',
-    destReceiver: request.userAddress || '0x0000000000000000000000000000000000000000',
+    const quoteRequest = {
+      srcChainId,
+      destChainId,
+      srcToken: getTokenAddress(request.pair.base, request.sourceChain),
+      destToken: getTokenAddress(request.pair.quote, request.targetChain),
+      srcAmountWei,
+      slippageBps: request.maxSlippageBps,
+      userAccount: request.userAddress || '0x0000000000000000000000000000000000000000',
+      destReceiver: request.userAddress || '0x0000000000000000000000000000000000000000',
+    }
+
+    const response = await fetch(`${apiUrl}/order/estimate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(quoteRequest),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`GUD quote failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error('Error getting GUD quote:', error);
+    throw new Error(`GUD quote failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const response = await fetch(`${apiUrl}/order/estimate`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(quoteRequest),
-  })
-
-  if (!response.ok) {
-    throw new Error(`GUD quote failed: ${response.status} ${response.statusText}`)
-  }
-
-  return response.json()
 }
 
 /**
@@ -92,25 +98,31 @@ async function buildGudTransaction(quote: GudQuote, request: ExecuteRequest): Pr
     throw new Error('GUD API key not configured')
   }
 
-  const buildRequest = {
-    quoteId: quote.id,
-    userAddress: request.userAddress,
+  try {
+    const buildRequest = {
+      quoteId: quote.id,
+      userAddress: request.userAddress,
+    }
+
+    const response = await fetch(`${apiUrl}/build`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(buildRequest),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`GUD build failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error('Error building GUD transaction:', error);
+    throw new Error(`GUD build failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const response = await fetch(`${apiUrl}/build`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(buildRequest),
-  })
-
-  if (!response.ok) {
-    throw new Error(`GUD build failed: ${response.status} ${response.statusText}`)
-  }
-
-  return response.json()
 }
 
 /**
@@ -124,26 +136,32 @@ async function executeGudTransaction(txData: GudTxData): Promise<GudExecutionRes
     throw new Error('GUD API key not configured')
   }
 
-  const executeRequest = {
-    txData: txData.data,
-    gasLimit: txData.gasLimit,
-    gasPrice: txData.gasPrice,
+  try {
+    const executeRequest = {
+      txData: txData.data,
+      gasLimit: txData.gasLimit,
+      gasPrice: txData.gasPrice,
+    }
+
+    const response = await fetch(`${apiUrl}/execute`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(executeRequest),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`GUD execution failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json()
+  } catch (error) {
+    console.error('Error executing GUD transaction:', error);
+    throw new Error(`GUD execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
-
-  const response = await fetch(`${apiUrl}/execute`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(executeRequest),
-  })
-
-  if (!response.ok) {
-    throw new Error(`GUD execution failed: ${response.status} ${response.statusText}`)
-  }
-
-  return response.json()
 }
 
 /**
@@ -155,38 +173,47 @@ async function waitForZircuitSettlement(txHash: string): Promise<any> {
     throw new Error('Zircuit RPC URL not configured')
   }
 
-  const maxRetries = 30 // 30 seconds timeout
-  let retries = 0
+  try {
+    const maxRetries = 30 // 30 seconds timeout
+    let retries = 0
 
-  while (retries < maxRetries) {
-    try {
-      const response = await fetch(zircuitRpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_getTransactionReceipt',
-          params: [txHash],
-          id: 1,
-        }),
-      })
+    while (retries < maxRetries) {
+      try {
+        const response = await fetch(zircuitRpc, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getTransactionReceipt',
+            params: [txHash],
+            id: 1,
+          }),
+        })
 
-      const result = await response.json()
-      
-      if (result.result && result.result.status === '0x1') {
-        return result.result
+        if (!response.ok) {
+          throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json()
+        
+        if (result.result && result.result.status === '0x1') {
+          return result.result
+        }
+        
+        // Wait 1 second before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        retries++
+      } catch (error) {
+        console.error('Error checking Zircuit settlement:', error)
+        retries++
       }
-      
-      // Wait 1 second before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      retries++
-    } catch (error) {
-      console.error('Error checking Zircuit settlement:', error)
-      retries++
     }
-  }
 
-  throw new Error('Zircuit settlement timeout')
+    throw new Error('Zircuit settlement timeout')
+  } catch (error) {
+    console.error('Error waiting for Zircuit settlement:', error);
+    throw new Error(`Zircuit settlement failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 /**
@@ -196,10 +223,16 @@ function calculateActualPnL(
   request: ExecuteRequest,
   result: GudExecutionResult
 ): number {
-  // For now, return estimated PnL
-  // In production, calculate based on actual amounts received
-  const slippageFactor = 1 - (request.maxSlippageBps / 10000)
-  return request.grossPnlUsd * slippageFactor
+  try {
+    // For now, return estimated PnL
+    // In production, calculate based on actual amounts received
+    const slippageFactor = 1 - (request.maxSlippageBps / 10000)
+    return request.grossPnlUsd * slippageFactor
+  } catch (error) {
+    console.error('Error calculating PnL:', error);
+    // Return a conservative estimate instead of failing
+    return request.grossPnlUsd * 0.9; // 10% slippage as fallback
+  }
 }
 
 /**
@@ -208,16 +241,20 @@ function calculateActualPnL(
 function getChainId(chain: string): number {
   const chainIds: Record<string, number> = {
     ethereum: 1,
+    polygon: 137,
     zircuit: 48900,
     arbitrum: 42161,
     base: 8453,
+    optimism: 10,
   }
-  return chainIds[chain] || 1
+  
+  const chainId = chainIds[chain]
+  if (!chainId) {
+    throw new Error(`Unsupported chain: ${chain}`)
+  }
+  
+  return chainId
 }
-
-/**
- * Get token address for a given symbol and chain
- */
 
 /**
  * Get token contract address for a given chain
@@ -226,28 +263,52 @@ function getTokenAddress(symbol: string, chain: string): string {
   // Proper token address mapping for supported chains
   const addresses: Record<string, Record<string, string>> = {
     ethereum: {
-      USDC: '0xA0b86a33E6441A8FadAA7F69C02E74ee82b91',
+      USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Fixed
       USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    },
+    polygon: {
+      USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+      USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+      WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+      WBTC: '0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6',
     },
     zircuit: {
-      USDC: '0xA0b86a33E6441A8FadAA7F69C02E74ee82b91',
-      USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-      WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', // Using Ethereum address as placeholder
+      USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7', // Using Ethereum address as placeholder
+      WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // Using Ethereum address as placeholder
+      WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', // Using Ethereum address as placeholder
     },
     arbitrum: {
-      USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+      USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // Updated to correct address
       USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
       WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+      WBTC: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
     },
     base: {
       USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
       USDT: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
       WETH: '0x4200000000000000000000000000000000000006',
+      WBTC: '0x1a35EE4640b0A3B87705B0A4B45D227Ba60Ca2ad',
+    },
+    optimism: {
+      USDC: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+      USDT: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58',
+      WETH: '0x4200000000000000000000000000000000000006',
+      WBTC: '0x68f180fcCe6836688e9084f035309E29Bf0A2095',
     },
   }
 
-  return addresses[chain]?.[symbol] || '0x0000000000000000000000000000000000000000'
+  if (!addresses[chain]) {
+    throw new Error(`Chain ${chain} not supported`);
+  }
+
+  if (!addresses[chain][symbol]) {
+    throw new Error(`Token ${symbol} not supported on chain ${chain}`);
+  }
+
+  return addresses[chain][symbol];
 }
 
 /**
@@ -255,7 +316,7 @@ function getTokenAddress(symbol: string, chain: string): string {
  */
 function getExecutorAddress(): string {
   // In production, this would be derived from the private key or wallet
-  return process.env.EXECUTOR_ADDRESS || '0x742d35Cc6634C0532925a3b8D9C9FEe4FEAB6f'
+  return process.env.EXECUTOR_ADDRESS || '0x742d35Cc6634C0532925a3b8D9C9FEe4FEAB6f';
 }
 
 // Type definitions for GUD API responses
