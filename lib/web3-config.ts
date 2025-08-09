@@ -1,4 +1,5 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { http, createConfig } from 'wagmi';
+import { injected, walletConnect, metaMask } from 'wagmi/connectors';
 import {
   arbitrum,
   base,
@@ -46,16 +47,32 @@ export const zircuitTestnet = {
   testnet: true,
 } as const;
 
-export const config = getDefaultConfig({
-  appName: 'ArbiZirQ',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '0123456789abcdef0123456789abcdef', // Fallback for development
-  chains: [
-    mainnet,
-    polygon,
-    arbitrum,
-    base,
-    zircuitMainnet,
-    ...(process.env.NODE_ENV === 'development' ? [zircuitTestnet, sepolia] : []),
+const chains = [
+  mainnet,
+  polygon,
+  arbitrum,
+  base,
+  zircuitMainnet,
+  ...(process.env.NODE_ENV === 'development' ? [zircuitTestnet, sepolia] : []),
+] as const;
+
+export const config = createConfig({
+  chains,
+  connectors: [
+    injected(),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'd6b3203f9238276df2440599c3497e69',
+    }),
+    metaMask(),
   ],
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  transports: {
+    [mainnet.id]: http(),
+    [polygon.id]: http(),
+    [arbitrum.id]: http(),
+    [base.id]: http(),
+    [zircuitMainnet.id]: http('https://mainnet.zircuit.com'),
+    [zircuitTestnet.id]: http('https://zircuit1.p2pify.com/'),
+    [sepolia.id]: http(),
+  },
+  ssr: true,
 });

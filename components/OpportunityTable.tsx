@@ -189,6 +189,21 @@ export function OpportunityTable({
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
                     <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleExecute(opportunity)}
+                      disabled={isProcessing}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      {isProcessing ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <Play className="h-3 w-3" />
+                      )}
+                      <span className="ml-1">Execute</span>
+                    </Button>
+                    
+                    <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleSimulate(opportunity)}
@@ -199,24 +214,8 @@ export function OpportunityTable({
                       ) : (
                         <Eye className="h-3 w-3" />
                       )}
-                      <span className="ml-1">Simulate</span>
+                      <span className="ml-1">Preview</span>
                     </Button>
-                    
-                    {opportunity.status === 'simulated' && (
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleExecute(opportunity)}
-                        disabled={isProcessing}
-                      >
-                        {isProcessing ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Play className="h-3 w-3" />
-                        )}
-                        <span className="ml-1">Execute</span>
-                      </Button>
-                    )}
                   </div>
                 </td>
               </tr>

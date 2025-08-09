@@ -57,10 +57,10 @@ export function SimulateDrawer({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            Simulate Arbitrage
+            Preview Arbitrage Opportunity
           </CardTitle>
           <CardDescription>
-            Review opportunity details and run simulation
+            Review opportunity details and test execution parameters
           </CardDescription>
         </CardHeader>
         
@@ -257,10 +257,10 @@ export function SimulateDrawer({
                   {isSimulating ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Simulating...
+                      Testing...
                     </>
                   ) : (
-                    'Run Simulation'
+                    'Test Parameters'
                   )}
                 </Button>
               )}
