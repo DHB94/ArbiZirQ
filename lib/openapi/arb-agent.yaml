@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: ArbiZirQ API
+  description: Flash Arbitrage Executor API for Zircuit × Bitte
+  version: 1.0.0
+  contact:
+    name: ArbiZirQ Team
+    url: https://github.com/sambitsargam/ArbiZirQ
+
+servers:
+  - url: /api
+    description: Local API server
+
+security:
+  - BitteAuth: []
+
+components:
+  securitySchemes:
+    BitteAuth:
+      type: apiKey
+      in: header
+      name: X-Bitte-Key
+
+  schemas:
+    Chain:
+      type: string
+      enum: [ethereum, polygon, zircuit, arbitrum, optimism]
+      
+    TokenPair:
+      type: object
+      properties:
+        base:
+          type: string
+          description: Base token symbol (e.g., "USDC")
+        quote:
+          type: string
+          description: Quote token symbol (e.g., "USDT")
+        
+    Quote:
+      type: object
+      properties:
+        dex:
+          type: string
+          description: DEX name
+        chain:
+          $ref: '#/components/schemas/Chain'
+        pair:
+          $ref: '#/components/schemas/TokenPair'
+        price:
+          type: number
+          description: Price in quote token
+        liquidity:
+          type: number
+          description: Available liquidity in USD
+        timestamp:
+          type: integer
+          description: Unix timestamp
+          
+    Opportunity:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique opportunity ID
+        pair:
+          $ref: '#/components/schemas/TokenPair'
+        sourceChain:
+          $ref: '#/components/schemas/Chain'
+        targetChain:
+          $ref: '#/components/schemas/Chain'
+        buyQuote:
+          $ref: '#/components/schemas/Quote'
+        sellQuote:
+          $ref: '#/components/schemas/Quote'
+        sizeDollar:
+          type: number
+          description: Trade size in USD
+        grossPnlUsd:
+          type: number
+          description: Gross profit before fees
+        timestamp:
+          type: integer
+          description: Unix timestamp
+        status:
+          type: string
+          enum: [new, simulated, executing, executed, failed]
+          default: new
+          
+    FeeBreakdown:
+      type: object
+      properties:
+        swapFees:
+          type: number
+          description: DEX swap fees in USD
+        bridgeFees:
+          type: number
+          description: Cross-chain bridge fees in USD
+        gasEstimate:
+          type: number
+          description: Gas costs in USD
+        routingFees:
+          type: number
+          description: GUD routing fees in USD
+        total:
+          type: number
+          description: Total fees in USD
+          
+    SimulationResult:
+      type: object
+      properties:
+        netPnlUsd:
+          type: number
+          description: Net profit after all fees
+        ok:
+          type: boolean
+          description: Whether the arbitrage is profitable
+        breakdown:
+          $ref: '#/components/schemas/FeeBreakdown'
+        notes:
+          type: array
+          items:
+            type: string
+          description: Simulation warnings or notes
+        slippageImpact:
+          type: number
+          description: Expected slippage in basis points
+          
+    ExecutionResult:
+      type: object
+      properties:
+        txHash:
+          type: string
+          description: Transaction hash on Zircuit
+        receipts:
+          type: array
+          items:
+            type: object
+          description: Transaction receipts from all chains
+        zircuitLatencyMs:
+          type: number
+          description: Settlement latency on Zircuit in milliseconds
+        actualPnlUsd:
+          type: number
+          description: Actual realized PnL
+          
+    HealthStatus:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        zircuit:
+          type: string
+          enum: [ready, down, error]
+        gud:
+          type: string
+          enum: [ready, down, error]
+        bitte:
+          type: string
+          enum: [ready, down, error]
+        timestamp:
+          type: integer
+
+    ScanRequest:
+      type: object
+      properties:
+        pairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenPair'
+          description: Token pairs to scan
+        chains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chain'
+          description: Chains to include in scan
+        minProfitUsd:
+          type: number
+          default: 10
+          description: Minimum profit threshold in USD
+        maxSlippageBps:
+          type: number
+          default: 100
+          description: Maximum slippage in basis points
+      required:
+        - pairs
+        - chains
+
+    SimulateRequest:
+      allOf:
+        - $ref: '#/components/schemas/Opportunity'
+        - type: object
+          properties:
+            maxSlippageBps:
+              type: number
+              default: 100
+
+    ExecuteRequest:
+      allOf:
+        - $ref: '#/components/schemas/Opportunity'
+        - type: object
+          properties:
+            dryRun:
+              type: boolean
+              default: false
+              description: Simulate execution without actual trades
+            maxSlippageBps:
+              type: number
+              default: 100
+
+paths:
+  /health:
+    get:
+      summary: Check API health status
+      operationId: getHealth
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /scan:
+    post:
+      summary: Scan for arbitrage opportunities
+      operationId: scanMarkets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+      responses:
+        '200':
+          description: List of arbitrage opportunities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Opportunity'
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+
+  /simulate:
+    post:
+      summary: Simulate arbitrage execution
+      operationId: simulate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateRequest'
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResult'
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+
+  /execute:
+    post:
+      summary: Execute arbitrage via GUD + Zircuit settlement
+      operationId: executeArb
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteRequest'
+      responses:
+        '200':
+          description: Execution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResult'
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error

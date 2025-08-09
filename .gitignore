@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+lib/api-types.ts
