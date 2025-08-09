@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ExecuteRequestSchema, type ExecutionResult } from '@/lib/types'
 import { executeViaGUD } from '@/lib/services/gud-client'
+import { executeRealArbitrage } from '@/lib/services/real-arbitrage-executor'
 import { validateOpportunity } from '@/lib/guards'
 
 export async function POST(request: NextRequest) {
@@ -33,11 +34,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if dry run mode is enabled globally
-    const dryRunMode = process.env.DRY_RUN_MODE === 'true'
-    const isDryRun = executeRequest.dryRun || dryRunMode
+    // Check execution mode - prioritize real execution
+    const forceSimulation = process.env.FORCE_SIMULATION === 'true'
+    const isDryRun = executeRequest.dryRun || forceSimulation
 
     if (isDryRun) {
+      console.log('🧪 Running in simulation mode')
       // Return simulated execution result
       const mockResult: ExecutionResult = {
         txHash: '0x' + '0'.repeat(64), // Mock transaction hash
@@ -49,8 +51,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(mockResult)
     }
 
-    // Execute the arbitrage via GUD Trading Engine
-    const executionResult = await executeViaGUD(executeRequest)
+    console.log('🚀 Executing REAL arbitrage trade')
+    
+    // Execute the arbitrage using real DEX swaps
+    const executionResult = await executeRealArbitrage(executeRequest)
 
     const response: ExecutionResult = executionResult
 

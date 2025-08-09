@@ -5,6 +5,8 @@ import useSWR from 'swr'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount, useChainId } from 'wagmi'
 import { OpportunityTable } from '@/components/OpportunityTable'
 import { SimulateDrawer } from '@/components/SimulateDrawer'
 import { ExecuteDialog } from '@/components/ExecuteDialog'
@@ -14,10 +16,11 @@ import { PortfolioTracker } from '@/components/PortfolioTracker'
 import { TradingInterface } from '@/components/TradingInterface'
 import { NotificationCenter } from '@/components/NotificationCenter'
 import { Toast } from '@/components/Toast'
+import { WalletConnectionCard } from '@/components/WalletConnectionCard'
 import { apiClient, swrKeys } from '@/lib/api'
 import type { Opportunity, ScanRequest } from '@/lib/types'
 import { DEFAULT_TOKEN_PAIRS, SUPPORTED_CHAINS, DEFAULT_SETTINGS } from '@/lib/constants'
-import { Settings, RefreshCw, Activity, BarChart3, Bot, Home } from 'lucide-react'
+import { Settings, RefreshCw, Activity, BarChart3, Bot, Home, Wallet, AlertTriangle, DollarSign, Zap, Network } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Dashboard() {
@@ -157,6 +160,39 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Wallet Connection Section */}
+        <WalletConnectionCard />
+
+        {/* Real Execution Notice */}
+        <Card className="mb-6 border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-green-800">
+              <DollarSign className="h-5 w-5" />
+              Real Arbitrage Execution Platform
+            </CardTitle>
+            <CardDescription className="text-green-700">
+              This platform executes <strong>real arbitrage trades</strong> using your connected wallet. 
+              Choose between live execution with real funds or simulation mode for testing.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-green-600" />
+                <span>Real DEX swaps on Uniswap, QuickSwap, SushiSwap</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Network className="h-4 w-4 text-green-600" />
+                <span>Cross-chain bridges for arbitrage execution</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-green-600" />
+                <span>Live transaction monitoring & settlement</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Guardrails Banner */}
         <GuardrailsBanner health={health} />

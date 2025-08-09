@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { WalletConnectButton } from '@/components/WalletConnectButton'
 import { 
   ArrowRight, 
   Zap, 
@@ -19,16 +19,6 @@ import {
 } from 'lucide-react'
 
 export default function LandingPage() {
-  const [isConnecting, setIsConnecting] = useState(false)
-
-  const handleConnect = () => {
-    setIsConnecting(true)
-    // In a real MVP, this would handle wallet connection
-    setTimeout(() => {
-      setIsConnecting(false)
-      window.location.href = '/dashboard'
-    }, 2000)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -43,17 +33,12 @@ export default function LandingPage() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href={"/dashboard" as any}>
+          <Link href="/dashboard">
             <Button variant="outline">Dashboard</Button>
           </Link>
-          <Button 
-            onClick={handleConnect}
-            disabled={isConnecting}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-            {!isConnecting && <ArrowRight className="ml-2 h-4 w-4" />}
-          </Button>
+          <WalletConnectButton className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            Connect Wallet
+          </WalletConnectButton>
         </div>
       </nav>
 
@@ -65,27 +50,36 @@ export default function LandingPage() {
           </Badge>
           
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-            Cross-Chain Arbitrage
+            Real Cross-Chain Arbitrage
             <br />
-            Made Simple
+            Execution Platform
           </h1>
           
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-            Discover and execute profitable arbitrage opportunities across Ethereum, Polygon, 
-            Arbitrum, and Zircuit with AI-powered optimization and built-in risk management.
+            <strong>Execute real arbitrage trades</strong> across Ethereum, Polygon, Arbitrum, Base, and Zircuit 
+            with AI-powered optimization, live DEX integration, and comprehensive risk management.
           </p>
           
+          <div className="flex items-center justify-center gap-6 mb-8">
+            <Badge className="bg-green-100 text-green-800 px-4 py-2">
+              🔴 LIVE TRADING
+            </Badge>
+            <Badge className="bg-blue-100 text-blue-800 px-4 py-2">
+              ⚡ Real DEX Swaps
+            </Badge>
+            <Badge className="bg-purple-100 text-purple-800 px-4 py-2">
+              🌉 Cross-Chain Bridges
+            </Badge>
+          </div>
+          
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button 
-              size="lg" 
-              onClick={handleConnect}
-              disabled={isConnecting}
+            <WalletConnectButton 
+              size="lg"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-3"
             >
-              {isConnecting ? 'Connecting...' : 'Start Trading'}
-              {!isConnecting && <ArrowRight className="ml-2 h-5 w-5" />}
-            </Button>
-            <Link href={"/dashboard" as any}>
+              Start Trading
+            </WalletConnectButton>
+            <Link href="/dashboard">
               <Button size="lg" variant="outline" className="text-lg px-8 py-3">
                 View Dashboard
               </Button>
@@ -118,14 +112,26 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover border-l-4 border-l-green-500">
+            <CardHeader>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <DollarSign className="h-6 w-6 text-green-600" />
+              </div>
+              <CardTitle>Real DEX Execution</CardTitle>
+              <CardDescription>
+                Execute actual swaps on Uniswap, QuickSwap, SushiSwap, and other major DEXs with real funds
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
             <CardHeader>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                 <Network className="h-6 w-6 text-blue-600" />
               </div>
-              <CardTitle>Cross-Chain Arbitrage</CardTitle>
+              <CardTitle>Cross-Chain Bridges</CardTitle>
               <CardDescription>
-                Execute arbitrage across Ethereum, Polygon, Arbitrum, Optimism, and Zircuit
+                Real cross-chain arbitrage with bridge integration for seamless token transfers
               </CardDescription>
             </CardHeader>
           </Card>
@@ -144,24 +150,12 @@ export default function LandingPage() {
 
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
             <CardHeader>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="h-6 w-6 text-green-600" />
-              </div>
-              <CardTitle>Built-in Safety</CardTitle>
-              <CardDescription>
-                Advanced guardrails for slippage protection, freshness checks, and risk management
-              </CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
-            <CardHeader>
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-                <TrendingUp className="h-6 w-6 text-orange-600" />
+                <Shield className="h-6 w-6 text-orange-600" />
               </div>
-              <CardTitle>Real-time Opportunities</CardTitle>
+              <CardTitle>Advanced Safety</CardTitle>
               <CardDescription>
-                Live market scanning with instant notifications for profitable trades
+                Real-time slippage protection, transaction monitoring, and comprehensive risk management
               </CardDescription>
             </CardHeader>
           </Card>
@@ -169,11 +163,11 @@ export default function LandingPage() {
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
             <CardHeader>
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                <BarChart3 className="h-6 w-6 text-red-600" />
+                <TrendingUp className="h-6 w-6 text-red-600" />
               </div>
-              <CardTitle>Advanced Analytics</CardTitle>
+              <CardTitle>Live Market Data</CardTitle>
               <CardDescription>
-                Detailed PnL breakdown, fee analysis, and performance tracking
+                Real-time price feeds and liquidity analysis across all supported chains and DEXs
               </CardDescription>
             </CardHeader>
           </Card>
@@ -181,11 +175,11 @@ export default function LandingPage() {
           <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 card-hover">
             <CardHeader>
               <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <Gauge className="h-6 w-6 text-indigo-600" />
+                <Activity className="h-6 w-6 text-indigo-600" />
               </div>
-              <CardTitle>Lightning Fast</CardTitle>
+              <CardTitle>Dual Execution Modes</CardTitle>
               <CardDescription>
-                Sub-5 second execution with GUD Trading Engine and Zircuit L2 settlement
+                Choose between real execution for profits or simulation mode for testing strategies
               </CardDescription>
             </CardHeader>
           </Card>
@@ -215,9 +209,9 @@ export default function LandingPage() {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white font-bold text-xl">2</span>
               </div>
-              <h3 className="text-xl font-bold mb-4">Simulate & Analyze</h3>
+              <h3 className="text-xl font-bold mb-4">Choose Execution Mode</h3>
               <p className="text-gray-600">
-                Review detailed fee breakdowns, slippage estimates, and net PnL before executing any trade
+                Select real execution for live trading or simulation mode for testing. Review fees, slippage, and profit estimates
               </p>
             </div>
 
@@ -225,9 +219,9 @@ export default function LandingPage() {
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white font-bold text-xl">3</span>
               </div>
-              <h3 className="text-xl font-bold mb-4">Execute & Profit</h3>
+              <h3 className="text-xl font-bold mb-4">Execute Real Trades</h3>
               <p className="text-gray-600">
-                Execute trades with one click using GUD's optimized routing and settle on Zircuit L2
+                Execute real DEX swaps and cross-chain bridges with your connected wallet. Monitor live transaction status
               </p>
             </div>
           </div>
@@ -244,15 +238,12 @@ export default function LandingPage() {
             Join the future of decentralized arbitrage trading with ArbiZirQ's 
             professional-grade platform built for Zircuit ecosystem.
           </p>
-          <Button 
-            size="lg" 
-            onClick={handleConnect}
-            disabled={isConnecting}
+          <WalletConnectButton 
+            size="lg"
             className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-3"
           >
-            {isConnecting ? 'Connecting...' : 'Get Started Now'}
-            {!isConnecting && <ArrowRight className="ml-2 h-5 w-5" />}
-          </Button>
+            Get Started Now
+          </WalletConnectButton>
         </div>
       </section>
 
@@ -275,9 +266,9 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href={"/dashboard" as any} className="hover:text-white">Dashboard</Link></li>
-                <li><Link href={"/analytics" as any} className="hover:text-white">Analytics</Link></li>
-                <li><Link href={"/api" as any} className="hover:text-white">API Docs</Link></li>
+                <li><Link href="/dashboard" className="hover:text-white">Dashboard</Link></li>
+                <li><Link href="/analytics" className="hover:text-white">Analytics</Link></li>
+                <li><Link href="/api" className="hover:text-white">API Docs</Link></li>
               </ul>
             </div>
 

@@ -25,7 +25,7 @@ export const DEFAULT_TOKEN_PAIRS: TokenPair[] = [
 export const DEFAULT_RPC_URLS: Record<Chain, string> = {
   ethereum: 'https://ethereum.publicnode.com',
   polygon: 'https://polygon.rpc.blxrbdn.com',
-  zircuit: 'https://zircuit1-mainnet.p2pify.com/',
+  zircuit: 'https://mainnet.zircuit.com',
   arbitrum: 'https://arbitrum.public-rpc.com',
   optimism: 'https://optimism.public-rpc.com',
 }
