@@ -64,19 +64,6 @@ describe('Math Utilities', () => {
     it('should simulate successful arbitrage', () => {
       const result = simulateArbitrage(mockOpportunity, 100)
       
-      // Debug logging
-      console.log('Simulation result:', {
-        ok: result.ok,
-        netPnlUsd: result.netPnlUsd,
-        breakdown: result.breakdown,
-        slippageImpact: result.slippageImpact,
-        notes: result.notes,
-      })
-      console.log('Input opportunity:', {
-        grossPnlUsd: mockOpportunity.grossPnlUsd,
-        sizeDollar: mockOpportunity.sizeDollar,
-      })
-      
       expect(result.ok).toBe(true)
       expect(result.netPnlUsd).toBeGreaterThan(0)
       expect(result.breakdown.total).toBeGreaterThan(0)

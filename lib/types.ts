@@ -89,6 +89,7 @@ export type SimulateRequest = z.infer<typeof SimulateRequestSchema>
 export const ExecuteRequestSchema = OpportunitySchema.extend({
   dryRun: z.boolean().default(false),
   maxSlippageBps: z.number().default(100),
+  userAddress: z.string().optional(),
 })
 export type ExecuteRequest = z.infer<typeof ExecuteRequestSchema>
 

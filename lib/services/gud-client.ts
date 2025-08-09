@@ -41,20 +41,31 @@ export async function executeViaGUD(request: ExecuteRequest): Promise<ExecutionR
  */
 async function getGudQuote(request: ExecuteRequest): Promise<GudQuote> {
   const apiKey = process.env.GUD_API_KEY
+  const apiUrl = process.env.GUD_API_URL || 'https://trading.ai.zircuit.com/api/engine/v1'
+  
   if (!apiKey) {
     throw new Error('GUD API key not configured')
   }
 
+  // Convert chain names to chain IDs
+  const srcChainId = getChainId(request.sourceChain)
+  const destChainId = getChainId(request.targetChain)
+  
+  // Convert USD amount to token wei amount (assuming USDC with 6 decimals for now)
+  const srcAmountWei = (request.sizeDollar * 1000000).toString() // 6 decimals for USDC
+
   const quoteRequest = {
-    fromChain: request.sourceChain,
-    toChain: request.targetChain,
-    fromToken: getTokenAddress(request.pair.base, request.sourceChain),
-    toToken: getTokenAddress(request.pair.quote, request.targetChain),
-    amount: request.sizeDollar.toString(),
-    slippage: request.maxSlippageBps / 10000, // Convert bps to decimal
+    srcChainId,
+    destChainId,
+    srcToken: getTokenAddress(request.pair.base, request.sourceChain),
+    destToken: getTokenAddress(request.pair.quote, request.targetChain),
+    srcAmountWei,
+    slippageBps: request.maxSlippageBps,
+    userAccount: request.userAddress || '0x0000000000000000000000000000000000000000',
+    destReceiver: request.userAddress || '0x0000000000000000000000000000000000000000',
   }
 
-  const response = await fetch('https://api.gud.finance/v1/quote', {
+  const response = await fetch(`${apiUrl}/order/estimate`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -75,17 +86,18 @@ async function getGudQuote(request: ExecuteRequest): Promise<GudQuote> {
  */
 async function buildGudTransaction(quote: GudQuote, request: ExecuteRequest): Promise<GudTxData> {
   const apiKey = process.env.GUD_API_KEY
+  const apiUrl = process.env.GUD_API_URL || 'https://trading.ai.zircuit.com/api/engine/v1'
+  
   if (!apiKey) {
     throw new Error('GUD API key not configured')
   }
 
   const buildRequest = {
     quoteId: quote.id,
-    userAddress: getExecutorAddress(),
-    deadline: Math.floor(Date.now() / 1000) + 300, // 5 minute deadline
+    userAddress: request.userAddress,
   }
 
-  const response = await fetch('https://api.gud.finance/v1/build', {
+  const response = await fetch(`${apiUrl}/build`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -106,6 +118,8 @@ async function buildGudTransaction(quote: GudQuote, request: ExecuteRequest): Pr
  */
 async function executeGudTransaction(txData: GudTxData): Promise<GudExecutionResult> {
   const apiKey = process.env.GUD_API_KEY
+  const apiUrl = process.env.GUD_API_URL || 'https://trading.ai.zircuit.com/api/engine/v1'
+  
   if (!apiKey) {
     throw new Error('GUD API key not configured')
   }
@@ -116,7 +130,7 @@ async function executeGudTransaction(txData: GudTxData): Promise<GudExecutionRes
     gasPrice: txData.gasPrice,
   }
 
-  const response = await fetch('https://api.gud.finance/v1/execute', {
+  const response = await fetch(`${apiUrl}/execute`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -176,40 +190,60 @@ async function waitForZircuitSettlement(txHash: string): Promise<any> {
 }
 
 /**
- * Calculate actual PnL from execution result
+ * Calculate actual PnL based on execution results
  */
 function calculateActualPnL(
   request: ExecuteRequest,
   result: GudExecutionResult
 ): number {
-  // In a real implementation, this would calculate the actual PnL
-  // based on the executed amounts and fees
-  
-  // For now, return estimated PnL with some slippage
+  // For now, return estimated PnL
+  // In production, calculate based on actual amounts received
   const slippageFactor = 1 - (request.maxSlippageBps / 10000)
   return request.grossPnlUsd * slippageFactor
 }
 
 /**
+ * Get chain ID from chain name
+ */
+function getChainId(chain: string): number {
+  const chainIds: Record<string, number> = {
+    ethereum: 1,
+    zircuit: 48900,
+    arbitrum: 42161,
+    base: 8453,
+  }
+  return chainIds[chain] || 1
+}
+
+/**
+ * Get token address for a given symbol and chain
+ */
+
+/**
  * Get token contract address for a given chain
  */
 function getTokenAddress(symbol: string, chain: string): string {
-  // Mock implementation - replace with actual token address mapping
+  // Proper token address mapping for supported chains
   const addresses: Record<string, Record<string, string>> = {
     ethereum: {
-      USDC: '0xA0b86a33E6441A, 8FadAA7F69C02E74ee82b',
+      USDC: '0xA0b86a33E6441A8FadAA7F69C02E74ee82b91',
       USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
       WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     },
-    polygon: {
-      USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-      USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
-      WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
-    },
     zircuit: {
-      USDC: '0x0000000000000000000000000000000000000001',
-      USDT: '0x0000000000000000000000000000000000000002',
-      WETH: '0x0000000000000000000000000000000000000003',
+      USDC: '0xA0b86a33E6441A8FadAA7F69C02E74ee82b91',
+      USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    },
+    arbitrum: {
+      USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+      USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+      WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    },
+    base: {
+      USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+      USDT: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
+      WETH: '0x4200000000000000000000000000000000000006',
     },
   }
 

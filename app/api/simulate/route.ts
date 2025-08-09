@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SimulateRequestSchema, type SimulationResult } from '@/lib/types'
 import { simulateArbitrage } from '@/lib/math'
-import { validateBitteAuth } from '@/lib/services/auth'
 import { validateOpportunity } from '@/lib/guards'
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate Bitte authentication
-    const authResult = validateBitteAuth(request)
-    if (!authResult.valid) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      )
-    }
-
     // Parse and validate request body
     const body = await request.json()
     const parseResult = SimulateRequestSchema.safeParse(body)

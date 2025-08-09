@@ -67,6 +67,8 @@ export const API_ENDPOINTS = {
   scan: '/api/scan',
   simulate: '/api/simulate',
   execute: '/api/execute',
+  aiAnalyze: '/api/ai-analyze',
+  optimize: '/api/optimize',
 } as const
 
 // UI polling intervals (in milliseconds)

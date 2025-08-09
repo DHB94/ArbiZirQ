@@ -9,6 +9,7 @@ import type {
   ExecuteRequest,
   ExecutionResult,
   HealthStatus,
+  Opportunity,
 } from './types'
 
 import { API_ENDPOINTS } from './constants'
@@ -103,6 +104,52 @@ export class ArbiZirQApiClient extends BaseApiClient {
   async execute(request: ExecuteRequest): Promise<ExecutionResult> {
     return this.post<ExecutionResult>(API_ENDPOINTS.execute, request)
   }
+
+  /**
+   * Get AI-powered analysis of an opportunity (Bitte integration)
+   */
+  async analyzeOpportunity(opportunity: Opportunity): Promise<{
+    opportunity: Opportunity
+    analysis: {
+      recommendation: 'execute' | 'skip' | 'monitor'
+      confidence: number
+      reasoning: string[]
+      riskLevel: 'low' | 'medium' | 'high'
+    }
+    timestamp: number
+  }> {
+    return this.post(API_ENDPOINTS.aiAnalyze, opportunity)
+  }
+
+  /**
+   * Get AI market insights (Bitte integration)
+   */
+  async getMarketInsights(): Promise<{
+    insights: {
+      trends: string[]
+      volatility: 'low' | 'medium' | 'high'
+      recommendations: string[]
+    }
+    timestamp: number
+  }> {
+    return this.get(API_ENDPOINTS.aiAnalyze)
+  }
+
+  /**
+   * Get AI optimization suggestions (Bitte integration)
+   */
+  async getOptimizationSuggestions(scanRequest: ScanRequest): Promise<{
+    current: ScanRequest
+    suggestions: {
+      suggestedPairs: Array<{base: string, quote: string}>
+      suggestedChains: string[]
+      suggestedSlippage: number
+      suggestedMinProfit: number
+    }
+    timestamp: number
+  }> {
+    return this.post(API_ENDPOINTS.optimize, scanRequest)
+  }
 }
 
 // Create singleton instance
@@ -114,6 +161,9 @@ export const fetchers = {
   scan: (request: ScanRequest) => apiClient.scanMarkets(request),
   simulate: (request: SimulateRequest) => apiClient.simulate(request),
   execute: (request: ExecuteRequest) => apiClient.execute(request),
+  analyzeOpportunity: (opportunity: Opportunity) => apiClient.analyzeOpportunity(opportunity),
+  marketInsights: () => apiClient.getMarketInsights(),
+  optimize: (request: ScanRequest) => apiClient.getOptimizationSuggestions(request),
 }
 
 // SWR keys for cache invalidation

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ScanRequestSchema, type ScanResponse } from '@/lib/types'
-import { scanMarkets } from '@/lib/services/dex-indexer'
+import { ScanRequestSchema } from '@/lib/types'
+import { bitteClient } from '@/lib/services/bitte-client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (!parseResult.success) {
       return NextResponse.json(
         { 
-          error: 'Invalid request format',
+          error: 'Invalid scan request format',
           details: parseResult.error.errors,
         },
         { status: 400 }
@@ -20,19 +20,16 @@ export async function POST(request: NextRequest) {
 
     const scanRequest = parseResult.data
 
-    // Scan markets for opportunities
-    const opportunities = await scanMarkets(scanRequest)
+    // Get AI optimization suggestions from Bitte
+    const suggestions = await bitteClient.getOptimizationSuggestions(scanRequest)
 
-    // Sort by gross PnL descending
-    const sortedOpportunities = opportunities.sort(
-      (a, b) => b.grossPnlUsd - a.grossPnlUsd
-    )
-
-    const response: ScanResponse = sortedOpportunities
-
-    return NextResponse.json(response)
+    return NextResponse.json({
+      current: scanRequest,
+      suggestions,
+      timestamp: Math.floor(Date.now() / 1000)
+    })
   } catch (error) {
-    console.error('Scan markets error:', error)
+    console.error('Optimization error:', error)
     
     return NextResponse.json(
       { error: 'Internal server error' },
