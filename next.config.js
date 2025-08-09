@@ -5,6 +5,7 @@ const nextConfig = {
   },
   env: {
     PROJECT_NAME: process.env.PROJECT_NAME,
+    VERCEL: process.env.VERCEL || false,
   },
   images: {
     domains: ['assets.coingecko.com'],
@@ -50,6 +51,15 @@ const nextConfig = {
       });
     }
     return config;
+  },
+  // Optimize for Vercel deployment
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
+  compress: true,
+  // Ensure API routes work properly in serverless environment
+  serverRuntimeConfig: {
+    PROJECT_ROOT: __dirname,
   },
 }
 
