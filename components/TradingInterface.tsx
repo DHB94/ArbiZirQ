@@ -22,6 +22,7 @@ import {
 import { formatUSD } from '@/lib/format'
 import type { Chain, TokenPair } from '@/lib/types'
 import { SUPPORTED_CHAINS, DEFAULT_TOKEN_PAIRS } from '@/lib/constants'
+import { useToast } from '@/components/ui/toast'
 
 interface TradingConfig {
   autoExecute: boolean
@@ -34,6 +35,8 @@ interface TradingConfig {
 }
 
 export function TradingInterface() {
+  const { addToast } = useToast()
+  
   const [config, setConfig] = useState<TradingConfig>({
     autoExecute: false,
     maxTradeSize: 5000,
@@ -53,12 +56,31 @@ export function TradingInterface() {
 
   const handleStartTrading = () => {
     setIsTrading(true)
-    // In a real MVP, this would start the automated trading bot
+    addToast({
+      type: 'success',
+      title: 'Trading Bot Started',
+      description: 'Scanning for arbitrage opportunities...'
+    })
+    
+    // Simulate finding opportunities
+    setTimeout(() => {
+      addToast({
+        type: 'info',
+        title: 'Opportunity Found',
+        description: 'ETH/USDC arbitrage detected with 3.2% profit margin'
+      })
+    }, 3000)
+    
     console.log('Starting automated trading with config:', config)
   }
 
   const handleStopTrading = () => {
     setIsTrading(false)
+    addToast({
+      type: 'warning',
+      title: 'Trading Bot Stopped',
+      description: 'All pending operations completed'
+    })
     console.log('Stopping automated trading')
   }
 
