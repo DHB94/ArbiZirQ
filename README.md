@@ -84,11 +84,21 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **Price Discovery**: Real-time price feeds with sub-second updates
 - **Opportunity Detection**: Advanced algorithms identify profitable arbitrage opportunities
 
-### Intelligent Execution Engine
-- **Smart Routing**: Optimal path calculation for maximum profitability
-- **Gas Optimization**: Dynamic gas pricing and transaction batching
-- **Slippage Protection**: Configurable slippage tolerance with automatic adjustments
-- **MEV Protection**: Front-running protection and transaction privacy features
+### Intelligent Execution Engine with GUD Trading Engine
+- **Smart Cross-Chain Routing**: GUD Trading Engine provides optimal path calculation across multiple blockchains for maximum profitability
+- **Automated Bridge Selection**: GUD intelligently chooses the best bridge protocols (Stargate, Hop, Across) based on cost and speed
+- **Liquidity Optimization**: Real-time liquidity analysis across DEXs to ensure optimal trade execution
+- **Gas Optimization**: Dynamic gas pricing and transaction batching via GUD's advanced routing algorithms
+- **Atomic Execution**: GUD ensures all arbitrage legs execute atomically or fail together
+- **Slippage Protection**: Configurable slippage tolerance with automatic adjustments through GUD's smart routing
+
+### AI-Powered Workflow Automation with Bitte Open Agents
+- **Intelligent Decision Making**: Bitte AI agents analyze market conditions and automatically decide which opportunities to pursue
+- **Automated Trading Workflows**: Complete scan → simulate → execute workflows managed by AI agents without human intervention
+- **Risk Assessment**: AI-driven risk analysis considers market volatility, liquidity depth, and historical performance
+- **Performance Optimization**: Machine learning algorithms continuously improve trading strategies based on execution results
+- **24/7 Autonomous Operation**: Bitte agents monitor markets and execute trades around the clock
+- **Adaptive Parameters**: AI automatically adjusts trading parameters based on market conditions and success rates
 
 ### Risk Management
 - **Comprehensive Guardrails**: 
@@ -117,7 +127,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Backend
 - **API Layer**: Next.js API routes with Zod validation
 - **Blockchain Integration**: viem for Ethereum interactions
-- **Cross-Chain**: GUD Trading Engine for optimal routing
+- **Cross-Chain Execution**: GUD Trading Engine for optimal cross-chain routing and execution
+- **AI Orchestration**: Bitte Open Agents for intelligent workflow automation and decision-making
 - **Settlement**: Zircuit L2 for efficient transaction finality
 
 ### Infrastructure
@@ -335,8 +346,8 @@ We welcome contributions from the community:
 
 ### Technology Partners
 - **Zircuit Labs**: L2 infrastructure and settlement optimization
-- **GUD Finance**: Cross-chain routing and trade execution
-- **Bitte Protocol**: Agent orchestration and automation
+- **GUD Finance**: Advanced cross-chain routing engine that provides optimal trade execution paths, automated bridge selection, and atomic transaction coordination across multiple blockchains
+- **Bitte Protocol**: AI agent orchestration platform that enables intelligent workflow automation, autonomous decision-making, and 24/7 trading operations through machine learning algorithms
 - **RainbowKit**: Wallet connection and Web3 integration
 
 ### Open Source Community
