@@ -7,37 +7,7 @@
 ```mermaid
 graph TB
     subgraph "Frontend Layer"
-      ## 📋 Flow Summary
-
-This document provides the 3 most essential visual flows for understanding ArbiZirQ:
-
-1. **System Architecture**: High-level component organization showing how frontend, API, services, and external integrations work together
-
-2. **Core Arbitrage Flow**: Complete user journey from market scanning through AI-powered simulation to GUD-executed trades, with detailed explanations of:
-   - **Bitte AI Integration**: Automated decision-making, risk assessment, and performance optimization
-   - **GUD Trading Engine**: Cross-chain routing, bridge optimization, and atomic execution coordination
-
-3. **Advanced Cross-Chain Architecture**: Detailed breakdown of:
-   - **GUD Engine Capabilities**: Multi-path analysis, bridge selection, gas optimization, and atomic transaction coordination
-   - **Bitte AI System**: Market scanning AI, risk analysis AI, execution optimization AI, and continuous learning algorithms
-
-4. **Risk Management**: Safety guardrails that protect users from unprofitable or risky trades
-
-### 🎯 Key Integrations Explained:
-
-**GUD Trading Engine**:
-- Provides optimal cross-chain routing across multiple blockchains
-- Intelligently selects best bridge protocols (Stargate, Hop, Across)
-- Ensures atomic execution of arbitrage trades
-- Optimizes gas costs and minimizes slippage
-
-**Bitte Open Agents**:
-- AI-powered market analysis and opportunity detection
-- Automated risk assessment and decision-making
-- 24/7 autonomous trading workflows
-- Continuous learning and strategy optimization
-
-These flows ensure ArbiZirQ operates as a robust, intelligent, and efficient cross-chain arbitrage platform powered by cutting-edge AI and advanced routing technology..js UI]
+        UI[Next.js UI]
         DASH[Dashboard]
         EXEC[Execute Dialog]
         WALLET[Wallet Connection]
@@ -78,6 +48,20 @@ These flows ensure ArbiZirQ operates as a robust, intelligent, and efficient cro
     UI --> HEALTH_API
     
     SCAN_API --> DEX
+    SIM_API --> ARB_SVC
+    EXECUTE_API --> ARB_SVC
+    
+    ARB_SVC --> GUD
+    ARB_SVC --> BITTE
+    ARB_SVC --> ZIRCUIT
+    
+    GUD --> BRIDGE
+    BRIDGE --> ETH
+    BRIDGE --> POLY
+    BRIDGE --> ARB_NET
+    BRIDGE --> OPT
+    BRIDGE --> ZIR
+```
     SIM_API --> ARB_SVC
     EXECUTE_API --> ARB_SVC
     
