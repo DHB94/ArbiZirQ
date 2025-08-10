@@ -2,9 +2,36 @@
 
 > **Essential visual documentation of ArbiZirQ's core arbitrage execution flows and system architecture.**
 
-## 📊 System Architecture Overview
+## 📊 System Architecture Ove## 📋 Flow Summary
 
-```mermaid
+This document provides 3 essential visual flows for understanding ArbiZirQ:
+
+1. **System Architecture**: Shows how frontend, API, services, and integrations work together
+
+2. **Core Arbitrage Flow**: User journey from scanning to execution with:
+   - **Bitte AI**: Market analysis and risk assessment
+   - **GUD Engine**: Cross-chain routing and execution
+
+3. **Cross-Chain Architecture**: Simple integration between:
+   - **Bitte AI System**: Market scanning, risk analysis, performance optimization
+   - **GUD Trading Engine**: Route calculation, bridge selection, trade execution
+   - **Blockchain Networks**: Ethereum, Polygon, Zircuit settlement
+
+4. **Risk Management**: Simple safety checks to protect users
+
+### 🎯 Key Technology Roles:
+
+**GUD Trading Engine**:
+- Cross-chain routing and bridge selection
+- Atomic transaction execution
+- Gas optimization and MEV protection
+
+**Bitte Open Agents**:
+- AI market analysis and opportunity detection
+- Automated risk assessment and decision-making
+- 24/7 trading operations and continuous learning
+
+These simplified flows show how ArbiZirQ operates as an intelligent, automated arbitrage platform.`mermaid
 graph TB
     subgraph "Frontend Layer"
         UI[Next.js UI]
@@ -86,171 +113,94 @@ sequenceDiagram
     participant User
     participant UI
     participant API
+    participant Bitte
     participant GUD
     participant Zircuit
     
-    Note over User,Zircuit: 1. Market Scanning Phase
+    Note over User,Zircuit: 1. Market Scanning
     User->>UI: Enable Auto-scan
     UI->>API: POST /api/scan
-    API->>API: Check Multiple DEXs
-    API->>API: Calculate Arbitrage Opportunities
-    API-->>UI: Return Profitable Opportunities
-    UI-->>User: Display Opportunities List
+    API->>Bitte: AI Market Analysis
+    Bitte-->>API: Profitable Opportunities
+    API-->>UI: Opportunity List
+    UI-->>User: Display Results
     
-    Note over User,Zircuit: 2. AI-Powered Simulation Phase (Bitte + GUD)
-    User->>UI: Click "Simulate" on Opportunity
+    Note over User,Zircuit: 2. AI Simulation
+    User->>UI: Click "Simulate"
     UI->>API: POST /api/simulate
-    API->>GUD: Request Optimal Route + Quote
-    Note over GUD: GUD Engine Analysis:<br/>• Multi-path routing<br/>• Bridge cost comparison<br/>• Liquidity depth check<br/>• Gas optimization
-    GUD-->>API: Optimized Route + Detailed Fees
-    API->>API: Bitte AI Risk Assessment
-    Note over API: Bitte AI Analysis:<br/>• Market volatility check<br/>• Success probability<br/>• Risk/reward ratio<br/>• Timing optimization
-    API->>API: Calculate Net PnL with All Fees
-    API-->>UI: AI-Enhanced Simulation Results
-    UI-->>User: Show Detailed Analysis + AI Insights
+    API->>GUD: Get Optimal Route
+    API->>Bitte: AI Risk Assessment
+    GUD-->>API: Route + Fees
+    Bitte-->>API: Risk Score
+    API-->>UI: Detailed Analysis
+    UI-->>User: Show Profit + Risks
     
-    Note over User,Zircuit: 3. Intelligent Execution Phase (GUD + Bitte Coordination)
-    User->>UI: Click "Execute" (if AI recommends)
-    UI->>UI: Check Wallet Connection
-    UI->>API: POST /api/execute (with userAddress)
-    API->>GUD: Submit Optimized Trade Order
-    Note over GUD: GUD Atomic Execution:<br/>• Source chain swap<br/>• Bridge coordination<br/>• Destination chain swap<br/>• MEV protection
-    GUD->>GUD: Execute Cross-chain Arbitrage
-    GUD->>Zircuit: Settle Final Results + Fees
-    Zircuit-->>GUD: Settlement Confirmation
-    GUD-->>API: Trade Completion Status
-    API->>API: Bitte Performance Tracking
-    Note over API: Bitte Learning:<br/>• Record success/failure<br/>• Update AI models<br/>• Optimize parameters<br/>• Report metrics
-    API-->>UI: Execution Results + AI Analysis
-    UI-->>User: Display Final Results + Performance Data
-    
-    Note over User,Zircuit: Real-time updates throughout
+    Note over User,Zircuit: 3. Smart Execution
+    User->>UI: Click "Execute"
+    UI->>API: POST /api/execute
+    API->>GUD: Execute Cross-chain Trade
+    GUD->>Zircuit: Settle Results
+    Zircuit-->>GUD: Confirmation
+    GUD-->>API: Trade Status
+    API->>Bitte: Log Performance
+    API-->>UI: Final Results
+    UI-->>User: Success/Failure
 ```
 
 ## 🌐 Cross-Chain Trading Architecture
 
-### GUD Trading Engine Integration & Execution Flow
+### Simple GUD + Bitte Integration Flow
 
 ```mermaid
 graph LR
-    subgraph "Source Chain (e.g., Ethereum)"
-        SDEX[Source DEX<br/>Uniswap V3]
-        STOKEN[Token A<br/>WETH]
-        SBRIDGE[Bridge Selection<br/>GUD Chooses Optimal]
+    subgraph "🔍 Bitte AI System"
+        AI[Market Scanner AI]
+        RISK[Risk Analyzer AI]
+        OPT[Performance AI]
     end
     
-    subgraph "GUD Trading Engine Core"
-        ROUTE[🧠 Route Calculation<br/>• Multi-path analysis<br/>• Gas optimization<br/>• Liquidity assessment]
-        BRIDGE_OPT[🌉 Bridge Optimization<br/>• Stargate vs Hop vs Across<br/>• Cost/speed analysis<br/>• Atomic coordination]
-        EXEC[⚡ Execution Coordinator<br/>• Transaction batching<br/>• MEV protection<br/>• Slippage management]
-        MONITOR[📊 Status Monitor<br/>• Real-time tracking<br/>• Failure detection<br/>• Recovery mechanisms]
+    subgraph "⚡ GUD Trading Engine"
+        ROUTE[Route Calculator]
+        BRIDGE[Bridge Selector]
+        EXEC[Trade Executor]
     end
     
-    subgraph "Destination Chain (e.g., Polygon)"
-        DBRIDGE[Bridge Receiver<br/>GUD Coordinated]
-        DTOKEN[Token B<br/>USDC]
-        DDEX[Destination DEX<br/>QuickSwap]
+    subgraph "🌐 Blockchain Networks"
+        ETH[Ethereum]
+        POLY[Polygon]
+        ZIR[Zircuit Settlement]
     end
     
-    subgraph "Settlement Chain (Zircuit)"
-        SETTLE[💰 Settlement<br/>• Profit calculation<br/>• Fee distribution<br/>• Final confirmation]
-        PROFIT[📈 PnL Analysis<br/>• Net profit after fees<br/>• Performance metrics]
-        FEES[💸 Fee Breakdown<br/>• GUD routing fees<br/>• Bridge costs<br/>• Gas optimization]
-    end
+    AI --> ROUTE
+    RISK --> BRIDGE
+    OPT --> EXEC
     
-    STOKEN --> SDEX
-    SDEX --> SBRIDGE
-    SBRIDGE --> ROUTE
-    ROUTE --> BRIDGE_OPT
-    BRIDGE_OPT --> EXEC
-    EXEC --> DBRIDGE
-    DBRIDGE --> DTOKEN
-    DTOKEN --> DDEX
-    DDEX --> SETTLE
-    SETTLE --> PROFIT
-    PROFIT --> FEES
+    ROUTE --> ETH
+    BRIDGE --> POLY
+    EXEC --> ZIR
     
-    MONITOR --> EXEC
-    MONITOR --> SETTLE
-    MONITOR --> ROUTE
-```
-
-### Bitte AI Orchestration & Decision Making Flow
-
-```mermaid
-graph TB
-    subgraph "🤖 Bitte AI Agent System"
-        AI_SCANNER[🔍 Market Scanner AI<br/>• Continuous monitoring<br/>• Pattern recognition<br/>• Opportunity ranking]
-        AI_ANALYZER[🧠 Risk Analyzer AI<br/>• Volatility assessment<br/>• Liquidity analysis<br/>• Profit probability]
-        AI_EXECUTOR[⚡ Execution AI<br/>• Timing optimization<br/>• Parameter adjustment<br/>• Success prediction]
-        AI_OPTIMIZER[📊 Performance AI<br/>• Strategy refinement<br/>• Learning from history<br/>• Parameter tuning]
-    end
-    
-    subgraph "📈 Market Data Sources"
-        PRICES[Real-time Prices]
-        LIQUIDITY[Liquidity Depth]
-        GAS_DATA[Gas Prices]
-        VOLATILITY[Market Volatility]
-    end
-    
-    subgraph "🎯 AI Decision Engine"
-        OPPORTUNITY_FILTER[Opportunity Filter<br/>• Min profit threshold<br/>• Risk assessment<br/>• Market conditions]
-        EXECUTION_TRIGGER[Execution Trigger<br/>• Optimal timing<br/>• Parameter selection<br/>• Risk mitigation]
-        WORKFLOW_MANAGER[Workflow Manager<br/>• Multi-step coordination<br/>• Error handling<br/>• Status reporting]
-    end
-    
-    subgraph "🔄 Automated Actions"
-        AUTO_SCAN[Auto Market Scan<br/>Every 30 seconds]
-        AUTO_SIMULATE[Auto Simulation<br/>For viable opportunities]
-        AUTO_EXECUTE[Auto Execution<br/>When conditions optimal]
-        AUTO_REPORT[Performance Reporting<br/>To Bitte dashboard]
-    end
-    
-    PRICES --> AI_SCANNER
-    LIQUIDITY --> AI_SCANNER
-    GAS_DATA --> AI_ANALYZER
-    VOLATILITY --> AI_ANALYZER
-    
-    AI_SCANNER --> OPPORTUNITY_FILTER
-    AI_ANALYZER --> EXECUTION_TRIGGER
-    AI_EXECUTOR --> WORKFLOW_MANAGER
-    AI_OPTIMIZER --> AI_SCANNER
-    
-    OPPORTUNITY_FILTER --> AUTO_SCAN
-    EXECUTION_TRIGGER --> AUTO_SIMULATE
-    WORKFLOW_MANAGER --> AUTO_EXECUTE
-    AUTO_EXECUTE --> AUTO_REPORT
-    
-    AUTO_REPORT --> AI_OPTIMIZER
+    ETH --> ZIR
+    POLY --> ZIR
 ```
 
 ## 🛡️ Risk Management & Guardrail System
 
-### Safety Checks Before Execution
+### Simple Safety Checks
 
 ```mermaid
 flowchart TD
-    START[New Arbitrage Opportunity] --> FRESH{Quote Fresh?<br/>< 30 seconds}
-    FRESH -->|No| REJECT[❌ Reject - Stale Quote]
+    START[New Opportunity] --> FRESH{Quote Fresh?}
+    FRESH -->|No| REJECT[❌ Reject]
     FRESH -->|Yes| PROFIT{Profit > $10?}
-    PROFIT -->|No| REJECT2[❌ Reject - Low Profit]
+    PROFIT -->|No| REJECT
     PROFIT -->|Yes| SLIP{Slippage < 1%?}
-    SLIP -->|No| REJECT3[❌ Reject - High Slippage]
-    SLIP -->|Yes| LIQ{Sufficient Liquidity?}
-    LIQ -->|No| REJECT4[❌ Reject - Low Liquidity]
-    LIQ -->|Yes| GAS{Gas Cost Reasonable?}
-    GAS -->|No| REJECT5[❌ Reject - High Gas]
-    GAS -->|Yes| WALLET{Wallet Connected?}
-    WALLET -->|No| REJECT6[❌ Reject - No Wallet]
-    WALLET -->|Yes| APPROVE[✅ Approve for Execution]
+    SLIP -->|No| REJECT
+    SLIP -->|Yes| WALLET{Wallet Connected?}
+    WALLET -->|No| REJECT
+    WALLET -->|Yes| APPROVE[✅ Execute]
     
     style APPROVE fill:#90EE90
     style REJECT fill:#FFB6C1
-    style REJECT2 fill:#FFB6C1
-    style REJECT3 fill:#FFB6C1
-    style REJECT4 fill:#FFB6C1
-    style REJECT5 fill:#FFB6C1
-    style REJECT6 fill:#FFB6C1
 ```
 
 ---
