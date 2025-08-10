@@ -53,6 +53,17 @@ export async function POST(request: NextRequest) {
 
     console.log('🚀 Executing REAL arbitrage trade')
     
+    // Validate that userAddress is provided for real execution
+    if (!executeRequest.userAddress) {
+      return NextResponse.json(
+        { 
+          error: 'User address is required for real execution',
+          details: ['userAddress field is required when dryRun is false'],
+        },
+        { status: 400 }
+      )
+    }
+    
     // Execute the arbitrage using real DEX swaps
     const executionResult = await executeRealArbitrage(executeRequest)
 

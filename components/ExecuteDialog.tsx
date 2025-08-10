@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useAccount } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -23,6 +24,7 @@ export function ExecuteDialog({
   onOpenChange,
   onComplete,
 }: ExecuteDialogProps) {
+  const { address, isConnected } = useAccount()
   const [isExecuting, setIsExecuting] = useState(false)
   const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null)
   const [maxSlippage, setMaxSlippage] = useState(100) // 1% in basis points
@@ -30,6 +32,11 @@ export function ExecuteDialog({
 
   const handleExecute = async () => {
     if (!confirmed) return
+
+    if (!isConnected || !address) {
+      onComplete(false, 'Wallet not connected. Please connect your wallet first.')
+      return
+    }
 
     setIsExecuting(true)
     try {
@@ -39,6 +46,7 @@ export function ExecuteDialog({
         ...opportunity,
         maxSlippageBps: maxSlippage,
         dryRun: false, // Always real execution
+        userAddress: address, // Include the connected wallet address
       })
       
       setExecutionResult(result)
@@ -205,10 +213,15 @@ export function ExecuteDialog({
             {!executionResult && (
               <Button
                 onClick={handleExecute}
-                disabled={isExecuting || !confirmed}
+                disabled={isExecuting || !confirmed || !isConnected || !address}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                {isExecuting ? (
+                {!isConnected ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Connect Wallet First
+                  </>
+                ) : isExecuting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Executing Real Trade...

@@ -2,7 +2,6 @@
 import { 
   writeContract, 
   readContract, 
-  getAccount, 
   getPublicClient,
   getWalletClient,
   switchChain,
@@ -93,17 +92,19 @@ export async function executeRealArbitrage(request: ExecuteRequest): Promise<Exe
   const receipts: any[] = []
   
   try {
-    // Validate wallet connection
-    const account = getAccount(config)
-    if (!account.address) {
-      throw new Error('Wallet not connected')
+    // Validate user address
+    if (!request.userAddress) {
+      throw new Error('User address is required for real execution')
     }
+
+    const userAddress = request.userAddress as `0x${string}`
+    console.log('👤 Executing for user:', userAddress)
 
     // Step 1: Execute buy leg on source chain
     console.log('💰 Executing buy leg on', request.sourceChain)
     await switchChain(config, { chainId: getChainId(request.sourceChain) as any })
     
-    const buyTxHash = await executeBuyLeg(request, account.address)
+    const buyTxHash = await executeBuyLeg(request, userAddress)
     const buyReceipt = await waitForTransactionReceipt(config, { hash: buyTxHash })
     receipts.push(buyReceipt)
     
@@ -112,7 +113,7 @@ export async function executeRealArbitrage(request: ExecuteRequest): Promise<Exe
     // Step 2: Bridge tokens if needed (cross-chain arbitrage)
     if (request.sourceChain !== request.targetChain) {
       console.log('🌉 Bridging tokens from', request.sourceChain, 'to', request.targetChain)
-      const bridgeTxHash = await bridgeTokens(request, account.address)
+      const bridgeTxHash = await bridgeTokens(request, userAddress)
       const bridgeReceipt = await waitForTransactionReceipt(config, { hash: bridgeTxHash })
       receipts.push(bridgeReceipt)
       
@@ -126,7 +127,7 @@ export async function executeRealArbitrage(request: ExecuteRequest): Promise<Exe
     console.log('💸 Executing sell leg on', request.targetChain)
     await switchChain(config, { chainId: getChainId(request.targetChain) as any })
     
-    const sellTxHash = await executeSellLeg(request, account.address)
+    const sellTxHash = await executeSellLeg(request, userAddress)
     const sellReceipt = await waitForTransactionReceipt(config, { hash: sellTxHash })
     receipts.push(sellReceipt)
     
