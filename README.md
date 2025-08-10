@@ -16,10 +16,6 @@ ArbiZirQ is a next-generation arbitrage trading platform that leverages cutting-
 - **📊 Comprehensive Analytics**: Detailed profit/loss tracking, fee breakdowns, and performance metrics
 - **🎯 Smart Routing**: Intelligent path finding for optimal trade execution and gas efficiency
 
-## 🚀 Live Demo
-
-**Dashboard**: [https://arbizirq.vercel.app](https://arbizirq.vercel.app)
-
 ## 🎯 Who This Is For
 
 - **Professional Traders**: Seeking automated arbitrage opportunities across multiple chains
