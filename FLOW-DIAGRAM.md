@@ -14,15 +14,15 @@ graph TB
     end
     
     subgraph "API Layer"
-        SCAN[/api/scan]
-        SIM[/api/simulate]
-        EXECUTE[/api/execute]
-        HEALTH[/api/health]
+        SCAN_API[API Scan]
+        SIM_API[API Simulate]
+        EXECUTE_API[API Execute]
+        HEALTH_API[API Health]
     end
     
     subgraph "Service Layer"
         DEX[DEX Indexer]
-        ARB[Arbitrage Executor]
+        ARB_SVC[Arbitrage Executor]
         RISK[Risk Manager]
         CALC[Fee Calculator]
     end
@@ -37,28 +37,28 @@ graph TB
     subgraph "Blockchain Networks"
         ETH[Ethereum]
         POLY[Polygon]
-        ARB[Arbitrum]
+        ARB_NET[Arbitrum]
         OPT[Optimism]
         ZIR[Zircuit]
     end
     
-    UI --> SCAN
-    UI --> SIM
-    UI --> EXECUTE
-    UI --> HEALTH
+    UI --> SCAN_API
+    UI --> SIM_API
+    UI --> EXECUTE_API
+    UI --> HEALTH_API
     
-    SCAN --> DEX
-    SIM --> ARB
-    EXECUTE --> ARB
+    SCAN_API --> DEX
+    SIM_API --> ARB_SVC
+    EXECUTE_API --> ARB_SVC
     
-    ARB --> GUD
-    ARB --> BITTE
-    ARB --> ZIRCUIT
+    ARB_SVC --> GUD
+    ARB_SVC --> BITTE
+    ARB_SVC --> ZIRCUIT
     
     GUD --> BRIDGE
     BRIDGE --> ETH
     BRIDGE --> POLY
-    BRIDGE --> ARB
+    BRIDGE --> ARB_NET
     BRIDGE --> OPT
     BRIDGE --> ZIR
 ```
