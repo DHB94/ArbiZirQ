@@ -243,7 +243,7 @@ export async function reportStatusToBitte(status: AgentStatus): Promise<void> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        agent_id: 'arbizirq',
+        agent_id: 'bitte-defi',
         status: status.status,
         message: status.message,
         timestamp: Date.now(),
